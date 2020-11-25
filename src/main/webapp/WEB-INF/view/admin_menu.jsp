@@ -13,7 +13,7 @@
 <body>
 Hello admin!
 <div>
-    <a href="<%=request.getContextPath()%>/LogoutServlet">Logout</a>
+    <a href="<%=request.getContextPath()%>/logout">Logout</a>
 </div>
 </body>
 </html>

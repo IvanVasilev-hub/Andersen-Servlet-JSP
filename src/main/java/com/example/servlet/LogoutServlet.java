@@ -17,7 +17,7 @@ public class LogoutServlet extends HttpServlet {
     if (session != null) {
       session.invalidate();
       req.setAttribute("errorMessage", "You have logged out.");
-      RequestDispatcher requestDispatcher = req.getRequestDispatcher("/view/login.jsp");
+      RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/view/login.jsp");
       requestDispatcher.forward(req, resp);
     }
   }

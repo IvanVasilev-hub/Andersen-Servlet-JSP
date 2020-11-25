@@ -13,16 +13,12 @@ import java.io.IOException;
 @WebServlet(name = "Login", urlPatterns = "/login")
 public class LoginServlet extends HttpServlet {
 
+  private final String PATH = "/WEB-INF/view";
   private UserDao userDao;
 
   @Override
   public void init() throws ServletException {
     userDao = new UserDao();
-  }
-
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    req.getRequestDispatcher("/view/login.jsp").forward(req, resp);
   }
 
   @Override
@@ -42,14 +38,14 @@ public class LoginServlet extends HttpServlet {
         if (user.containsRole("Admin")) {
           req.getSession().setAttribute("admin", true);
         }
-        req.getRequestDispatcher("/view/user_menu.jsp").forward(req, resp);
+        req.getRequestDispatcher(PATH + "/user_menu.jsp").forward(req, resp);
       }
       if (user.containsRole("Guest")) {
-        req.getRequestDispatcher("/view/guest_menu.jsp").forward(req, resp);
+        req.getRequestDispatcher(PATH + "/guest_menu.jsp").forward(req, resp);
       }
     }
     req.setAttribute("errorMessage", "Incorrect email or password");
-    req.getRequestDispatcher("/view/login.jsp").forward(req, resp);
+    req.getRequestDispatcher(PATH + "/login.jsp").forward(req, resp);
   }
 
   private User getUser(String email, String password) {
