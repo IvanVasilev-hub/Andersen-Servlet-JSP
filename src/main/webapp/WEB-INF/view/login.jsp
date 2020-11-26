@@ -1,32 +1,28 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Login</title>
+    <title>Login Page</title>
 </head>
 <body>
-<form action="<%=request.getContextPath()%>/login" method="post">
-
-    <table align="center">
-        <tr>
-            <td>Email</td>
-            <td><input type="text" name="email"/></td>
-        </tr>
-        <tr>
-            <td>Password</td>
-            <td><input type="password" name="password"/></td>
-        </tr>
-        <tr>
-            <td><span style="color:red">
-                <%=(request.getAttribute("errorMessage") == null)
-                        ? "" : request.getAttribute("errorMessage")%>
-            </span>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><input type="submit" value="Login"> <input type="reset" value="Reset"></td>
-        </tr>
-    </table>
+<form method="post" action="/login">
+    <p>
+        <input type="text" name="email" placeholder="email">
+    </p>
+    <p>
+        <input type="password" name="password" placeholder="password">
+    </p>
+    <button type="submit">Login</button>
 </form>
+<form action="/create">
+    <button type="submit">Create</button>
+</form>
+<span style="color:red">
+                <%=(request.getAttribute("error") == null)
+                        ? "" : request.getAttribute("error")%>
+</span>
+<span style="color:darkgreen">
+                <%=(request.getAttribute("success") == null)
+                        ? "" : request.getAttribute("success")%>
+</span>
 </body>
 </html>

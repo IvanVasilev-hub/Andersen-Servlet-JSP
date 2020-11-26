@@ -1,31 +1,14 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    user_id  INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
     email    VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    role     VARCHAR(30)  NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS roles
-(
-    role_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    role    VARCHAR(255) NOT NULL UNIQUE
-);
+insert into users (email, password, role)
+VALUES ('admin@gmail.com', 'admin', 'ADMIN'),
+       ('user@gmail.com', 'user', 'USER');
 
-CREATE table if not exists users_roles
-(
-    user_id int not null references users (user_id),
-    role_id int not null references roles (role_id),
-    constraint users_roles_pk primary key (user_id, role_id)
-);
-
-insert into users (email, password)
-VALUES ('admin@gmail.com', 'admin');
-
-insert into roles (role)
-values ('Admin'),
-       ('User'),
-       ('Guest');
-
-insert into users_roles (user_id, role_id)
-VALUES (1, 1),
-       (1, 2);
+select *
+from users;

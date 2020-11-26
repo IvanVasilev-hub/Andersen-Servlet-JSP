@@ -1,60 +1,68 @@
 package com.example.dao;
 
-import com.example.entity.Role;
 import com.example.entity.User;
-import com.example.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import com.example.util.JdbcUtil;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static com.example.entity.Role.GUEST;
+import static com.example.entity.Role.valueOf;
 
 public class UserDao {
 
-  private SessionFactory sessionFactory;
-
-  public UserDao() {
-    sessionFactory = HibernateUtil.getSessionFactory();
-  }
-
-  public boolean create(User user) {
-    if (read(user) != null) {
-      Role role = new Role("Guest");
-      role.setId(3);
-      Session session = sessionFactory.openSession();
-      session.beginTransaction();
-      session.update(role);
-      user.addRole(role);
-      session.persist(user);
-      session.getTransaction().commit();
-      session.close();
-      return true;
+  public void create(User user) {
+    try (Connection conn = JdbcUtil.getConnection()) {
+      PreparedStatement st = conn.prepareStatement(
+          "Insert into users (email, password, role) VALUES (?, ?, ?)");
+      st.setString(1, user.getEmail());
+      st.setString(2, user.getPassword());
+      st.setString(3, String.valueOf(GUEST));
+      st.execute();
+    } catch (SQLException | ClassNotFoundException e) {
+      e.printStackTrace();
     }
-    return false;
   }
 
   public User read(int id) {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-    User user = session.get(User.class, id);
-    session.getTransaction().commit();
-    session.close();
+    User user = null;
+    try (Connection conn = JdbcUtil.getConnection()) {
+      PreparedStatement st = conn.prepareStatement(
+          "SELECT id, email, password, role FROM users WHERE id = ?");
+      st.setInt(1, id);
+      ResultSet set = st.executeQuery();
+      while (set.next()) {
+        user = new User();
+        user.setId(set.getInt(1));
+        user.setEmail(set.getString(2));
+        user.setPassword(set.getString(3));
+        user.setRole(valueOf(set.getString(4)));
+      }
+    } catch (SQLException | ClassNotFoundException e) {
+      e.printStackTrace();
+    }
     return user;
   }
 
   public User read(String email) {
     User user = null;
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-    List<User> users = session.createQuery("SELECT u from User u " +
-        "WHERE u.email = :email", User.class)
-        .setParameter("email", email).list();
-    if (users != null && !users.isEmpty()) {
-      user = users.get(0);
+    try (Connection conn = JdbcUtil.getConnection()) {
+      PreparedStatement st = conn.prepareStatement(
+          "SELECT id, email, password, role FROM users WHERE email = ?");
+      st.setString(1, email);
+      ResultSet set = st.executeQuery();
+      while (set.next()) {
+        user = new User();
+        user.setId(set.getInt(1));
+        user.setEmail(set.getString(2));
+        user.setPassword(set.getString(3));
+        user.setRole(valueOf(set.getString(4)));
+      }
+    } catch (SQLException | ClassNotFoundException e) {
+      e.printStackTrace();
     }
-    session.getTransaction().commit();
-    session.close();
     return user;
   }
 
@@ -62,57 +70,7 @@ public class UserDao {
     return read(user.getEmail());
   }
 
-  public List<User> readAll() {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-    List<User> users = session.createQuery("from User ", User.class).getResultList();
-    session.getTransaction().commit();
-    session.close();
-    return users;
-  }
-
-  public int update(User user) {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-    int affected = session.createQuery("UPDATE User set email = :email, password = :pass " +
-        "WHERE id = :id")
-        .setParameter("email", user.getEmail())
-        .setParameter("pass", user.getPassword())
-        .setParameter("id", user.getId()).executeUpdate();
-    session.getTransaction().commit();
-    session.close();
-    return affected;
-  }
-
-  public int delete(int id) {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-    int affected = session.createQuery("delete from User where id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
-    session.getTransaction().commit();
-    session.close();
-    return affected;
-  }
-
-  public Set<User> getUsersByRole(String roleName) {
-    Set<User> users = new HashSet<>();
-    Role role = new RoleDao().read(roleName);
-    if (role != null) {
-      users = role.getUsers();
-    }
-    return users;
-  }
-
-  public void addRole(int id, Role role) {
-    User user = read(id);
-    if (user != null) {
-      user.addRole(role);
-      Session session = sessionFactory.openSession();
-      session.beginTransaction();
-      session.update(user);
-      session.getTransaction().commit();
-      session.close();
-    }
+  public boolean isExists(User user) {
+    return read(user.getEmail()) != null;
   }
 }
